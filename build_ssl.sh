@@ -8,6 +8,14 @@
 
 BUILD_DIR=$(pwd)
 
+if [ "$(uname)" == "Darwin" ]; then
+		ANDROIDNDKROOT=$HOME/Library/Android/sdk/ndk
+		CORES=$(sysctl -n hw.ncpu)
+else
+		ANDROIDNDKROOT=$HOME/android/ndk
+		CORES=$(nrpoc)
+fi
+
 # Comment out the line for any configuration you don't want to build
 declare -a params=(
     ''
@@ -18,8 +26,8 @@ declare -A ssl_versions_output_dir=(
     ["ssl_3"]="3*"
 )
 declare -A ssl_versions_ndk=(
-    ["1.1.1u"]="$HOME/android/ndk/21.4.7075529"
-    ["3.1.1"]="$HOME/android/ndk/25.2.9519653"
+    ["1.1.1v"]="$ANDROIDNDKROOT/21.4.7075529"
+    ["3.1.2"]="$ANDROIDNDKROOT/25.2.9519653"
 )
 declare -A architectures=(
     ["x86_64"]="x86_64"
@@ -92,7 +100,7 @@ build_ssl_1_1() {
     log_file=$3
 
     echo "Building..."
-    make -j$(nproc) SHLIB_VERSION_NUMBER= SHLIB_EXT=_1_1.so build_libs 2>&1 1>>${log_file} | tee -a ${log_file} || exit 1
+    make -j$CORES SHLIB_VERSION_NUMBER= SHLIB_EXT=_1_1.so build_libs 2>&1 1>>${log_file} | tee -a ${log_file} || exit 1
     llvm-strip --strip-all libcrypto_1_1.so
     llvm-strip --strip-all libssl_1_1.so
     cp libcrypto_1_1.so libssl_1_1.so "../$version_out_dir/$qt_arch" || exit 1
@@ -106,7 +114,7 @@ build_ssl_3() {
     log_file=$3
 
     echo "Building..."
-    make -j$(nproc) SHLIB_VERSION_NUMBER= build_libs 2>&1 1>>${log_file} | tee -a ${log_file} || exit 1
+    make -j$CORES SHLIB_VERSION_NUMBER= build_libs 2>&1 1>>${log_file} | tee -a ${log_file} || exit 1
     llvm-strip --strip-all libcrypto.so
     llvm-strip --strip-all libssl.so
 
