@@ -166,7 +166,9 @@ for param in "${params[@]}"; do
                         ;;
                 esac
 
-                if [ "$arch" == "arm64" ] && [ ! -d "../$version_out_dir/include/openssl" ]; then
+                if [ "$arch" == "arm64" ]; then
+                    echo "Update OpenSSL version $version_out_dir headers."
+                    rm -fr "../$version_out_dir/include"
                     cp -a include "../$version_out_dir" || exit 1
                 fi
                 popd
