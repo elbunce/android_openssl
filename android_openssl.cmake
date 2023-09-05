@@ -15,6 +15,7 @@ function(add_android_openssl_libraries)
             ${ssl_root_path}/ssl_1.1/${CMAKE_ANDROID_ARCH_ABI}/libssl_1_1.so)
     endif()
 
-    set_target_properties(${ARGN} PROPERTIES
+    set_property(TARGET ${ARGN}
+        APPEND PROPERTY
         QT_ANDROID_EXTRA_LIBS "${android_extra_libs}")
 endfunction()
