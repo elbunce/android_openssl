@@ -26,8 +26,8 @@ declare -A ssl_versions_output_dir=(
     ["ssl_3"]="3*"
 )
 declare -A ssl_versions_ndk=(
-    ["1.1.1v"]="$ANDROIDNDKROOT/21.4.7075529"
-    ["3.1.2"]="$ANDROIDNDKROOT/25.2.9519653"
+    ["1.1.1w"]="$ANDROIDNDKROOT/21.4.7075529"
+    ["3.4.1"]="$ANDROIDNDKROOT/25.2.9519653"
 )
 declare -A architectures=(
     ["x86_64"]="x86_64"
@@ -39,8 +39,15 @@ declare -A architectures=(
 download_ssl_version() {
     ssl_version=$1
     echo "Downloading OpenSSL $ssl_version"
-    if [ ! -f "openssl-$ssl_version.tar.gz" ]; then
-        wget -q --show-progress "https://www.openssl.org/source/openssl-$ssl_version.tar.gz"
+    if [ ! -f "$ssl_version.tar.gz" ]; then
+	case $ssl_version in
+	    1.1*)
+		wget -q --show-progress "https://www.openssl.org/source/openssl-$ssl_version.tar.gz"
+		;;
+	    3*)
+		wget --show-progress "https://github.com/openssl/openssl/releases/download/openssl-$ssl_version/openssl-$ssl_version.tar.gz"
+		;;
+	esac
     fi
 }
 
