@@ -15,5 +15,5 @@
 
 # define DSO_DLFCN
 # define HAVE_DLFCN_H
-# define DSO_EXTENSION ".so"
+# define DSO_EXTENSION "_$(SHLIB_VERSION_NUMBER).so"
 #endif

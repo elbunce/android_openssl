@@ -86,13 +86,18 @@ configure_ssl() {
     case $version_out_dir in
     ssl_1.1)
         ANDROID_API=21
+	arch_prefix=
         ;;
     ssl_3)
         ANDROID_API=23
+	arch_prefix=qt
+	pwd
+echo	cp -v ${BUILD_DIR}/20-qtandroid.conf Configurations
+	cp -v ${BUILD_DIR}/20-qtandroid.conf Configurations
         ;;
     esac
 
-    config_params=( "${param}" "shared" "android-${arch}"
+    config_params=( "${param}" "shared" "${arch_prefix}android-${arch}"
                     "-U__ANDROID_API__" "-D__ANDROID_API__=${ANDROID_API}" )
     echo "Configuring OpenSSL $ssl_version with parameters: ${config_params[@]}"
 
@@ -110,8 +115,8 @@ build_ssl_1_1() {
     make -j$CORES SHLIB_VERSION_NUMBER= SHLIB_EXT=_1_1.so build_libs 2>&1 1>>${log_file} | tee -a ${log_file} || exit 1
     llvm-strip --strip-all libcrypto_1_1.so
     llvm-strip --strip-all libssl_1_1.so
-    cp libcrypto_1_1.so libssl_1_1.so "../$version_out_dir/$qt_arch" || exit 1
-    cp libcrypto.a libssl.a "../$version_out_dir/$qt_arch" || exit 1
+    cp -v libcrypto_1_1.so libssl_1_1.so "../$version_out_dir/$qt_arch" || exit 1
+    cp -v libcrypto.a libssl.a "../$version_out_dir/$qt_arch" || exit 1
 }
 
 build_ssl_3() {
@@ -121,20 +126,14 @@ build_ssl_3() {
     log_file=$3
 
     echo "Building..."
-    make -j$CORES SHLIB_VERSION_NUMBER= build_libs 2>&1 1>>${log_file} | tee -a ${log_file} || exit 1
-    llvm-strip --strip-all libcrypto.so
-    llvm-strip --strip-all libssl.so
+    make -j$CORES build_libs 2>&1 1>>${log_file} | tee -a ${log_file} || exit 1
+    llvm-strip --strip-all libcrypto_3.so
+    llvm-strip --strip-all libssl_3.so
 
     out_path="../$version_out_dir/$qt_arch"
-    cp libcrypto.a libssl.a "${out_path}" || exit 1
-    cp libcrypto.so "${out_path}/libcrypto_3.so" || exit 1
-    cp libssl.so "${out_path}/libssl_3.so" || exit 1
-
-    pushd ${out_path} || exit 1
-    patchelf --set-soname libcrypto_3.so libcrypto_3.so || exit 1
-    patchelf --set-soname libssl_3.so libssl_3.so || exit 1
-    patchelf --replace-needed libcrypto.so libcrypto_3.so libssl_3.so || exit 1
-    popd
+    cp -v libcrypto.a libssl.a "${out_path}" || exit 1
+    cp -v libcrypto_3.so "${out_path}/libcrypto_3.so" || exit 1
+    cp -v libssl_3.so "${out_path}/libssl_3.so" || exit 1
 }
 
 for param in "${params[@]}"; do
